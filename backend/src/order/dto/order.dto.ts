@@ -1,10 +1,10 @@
 import { Type } from 'class-transformer';
 import {
   IsArray,
-  IsDateString,
   IsEmail,
   IsNumber,
   IsPhoneNumber,
+  IsString,
   IsUUID,
   Min,
   ValidateNested,
@@ -16,7 +16,7 @@ export class TicketDto {
   film: string;
   @IsUUID()
   session: string;
-  @IsDateString()
+  @IsString()
   daytime: string;
   @IsNumber()
   @Min(1)
@@ -32,7 +32,7 @@ export class TicketDto {
 export class CreateOrderDto {
   @IsEmail({}, { message: 'Некорректный формат email' })
   email: string;
-  @IsPhoneNumber('RU', { message: 'Некорректный номер телефона' })
+  @IsPhoneNumber(undefined, { message: 'Некорректный номер телефона' })
   phone: string;
   @IsArray()
   @ValidateNested({ each: true })

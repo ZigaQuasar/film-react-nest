@@ -15,20 +15,6 @@ export class FilmsService {
     return film;
   }
 
-  private toScheduleDto(doc: FilmWithSchedule['schedule'][0]): ScheduleDto {
-    const daytimeValue = doc.daytime;
-    const daytimeIso =
-      daytimeValue instanceof Date
-        ? daytimeValue.toISOString()
-        : String(daytimeValue);
-
-    return {
-      ...doc,
-      daytime: daytimeIso,
-      hall: String(doc.hall),
-    };
-  }
-
   async findAll(): Promise<{ total: number; items: FilmDto[] }> {
     const films = await this.filmsRepository.findAll();
 
@@ -49,11 +35,15 @@ export class FilmsService {
       throw new NotFoundException('Фильм не найден');
     }
 
-    const schedule: ScheduleDto[] = film.schedule.map(this.toScheduleDto);
-
     return {
-      total: schedule.length,
-      items: schedule,
+      total: film.schedule.length,
+      items: film.schedule.map((s) => ({
+        ...s,
+        daytime:
+          s.daytime instanceof Date
+            ? s.daytime.toISOString()
+            : String(s.daytime),
+      })),
     };
   }
 }

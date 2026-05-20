@@ -1,11 +1,4 @@
-import {
-  IsArray,
-  IsDateString,
-  IsNumber,
-  IsString,
-  IsUUID,
-  Min,
-} from 'class-validator';
+import { IsArray, IsNumber, IsString, IsUUID, Min } from 'class-validator';
 
 //TODO описать DTO для запросов к /films
 export class FilmDto {
@@ -34,10 +27,10 @@ export class FilmDto {
 export class ScheduleDto {
   @IsUUID()
   id: string;
-  @IsDateString()
-  daytime: string;
   @IsString()
-  hall: string;
+  daytime: string;
+  @IsNumber()
+  hall: number;
   @IsNumber()
   @Min(1)
   rows: number;
