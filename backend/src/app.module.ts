@@ -4,7 +4,6 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import * as path from 'node:path';
 
 import { MongooseModule } from '@nestjs/mongoose';
-import { configProvider } from './app.config.provider';
 import { FilmsModule } from './films/films.module';
 import { OrderModule } from './order/order.module';
 
@@ -28,6 +27,6 @@ import { OrderModule } from './order/order.module';
     OrderModule,
   ],
   controllers: [],
-  providers: [configProvider],
+  providers: [],
 })
 export class AppModule {}

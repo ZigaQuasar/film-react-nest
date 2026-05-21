@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateOrderDto, TicketResponseDto } from './dto/order.dto';
 import { FilmsRepository } from '../repository/films.repository';
 import { randomUUID } from 'crypto';
@@ -24,16 +28,18 @@ export class OrderService {
         filmId,
         sessionId,
       );
-      if (!session) throw new BadRequestException('Session not found');
+      if (!session) throw new NotFoundException('Сеанс не найден');
 
-      const alreadyTaken = seats.filter((s) => session.taken?.includes(s));
-      if (alreadyTaken.length > 0) {
+      const isBooked = await this.filmsRepository.bookSeatsAtomic(
+        filmId,
+        sessionId,
+        seats,
+      );
+      if (!isBooked) {
         throw new BadRequestException(
-          `Seats ${alreadyTaken.join(', ')} are already booked`,
+          'Одно или несколько мест уже забронированы',
         );
       }
-
-      await this.filmsRepository.bookSeatsAtomic(filmId, sessionId, seats);
     }
 
     const items: TicketResponseDto[] = dto.tickets.map((t) => ({
