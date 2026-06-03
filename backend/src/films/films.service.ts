@@ -2,16 +2,16 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { FilmDto, ScheduleDto } from './dto/films.dto';
 import {
   FilmsRepository,
-  FilmWithSchedule,
 } from '../repository/films.repository';
+import { Film } from './entities/film.entity';
 
 @Injectable()
 export class FilmsService {
   constructor(private readonly filmsRepository: FilmsRepository) {}
 
-  private toFilmDto(doc: FilmWithSchedule): FilmDto {
+  private toFilmDto(doc: Film): FilmDto {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { schedule: _, ...film } = doc;
+    const { schedules: _, ...film } = doc;
     return film;
   }
 
@@ -36,8 +36,8 @@ export class FilmsService {
     }
 
     return {
-      total: film.schedule.length,
-      items: film.schedule.map((s) => ({
+      total: film.schedules.length,
+      items: film.schedules.map((s) => ({
         ...s,
         daytime:
           s.daytime instanceof Date
