@@ -1,4 +1,5 @@
-import { IsArray, IsNumber, IsString, IsUUID, Min } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsArray, IsNumber, IsString, IsUUID, Min, ValidateNested } from 'class-validator';
 
 //TODO описать DTO для запросов к /films
 export class FilmDto {
@@ -22,6 +23,10 @@ export class FilmDto {
   image: string;
   @IsString()
   cover: string;
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ScheduleDto)
+  schedule: ScheduleDto[];
 }
 
 export class ScheduleDto {

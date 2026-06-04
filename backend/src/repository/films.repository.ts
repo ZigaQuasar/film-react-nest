@@ -28,13 +28,13 @@ export class FilmsRepository implements IFilmsRepository {
   ){}
 
   async findAll(): Promise<Film[]> {
-    return this.filmRepository.find({ relations: ['schedules'] });
+    return this.filmRepository.find({ relations: ['schedule'] });
   }
 
   async findById(id: string): Promise<Film | undefined> {
     return this.filmRepository.findOne({
       where: { id },
-      relations: ['schedules'],
+      relations: ['schedule'],
     });
   }
 

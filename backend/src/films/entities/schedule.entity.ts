@@ -7,7 +7,7 @@ export class Schedule {
   id: string;
 
   @Column()
-  daytime: Date;
+  daytime: string;
 
   @Column()
   hall: number;
@@ -24,7 +24,7 @@ export class Schedule {
   @Column('text', { array: true, default: '{}' })
   taken: string[];
 
-  @ManyToOne(() => Film, (film) => film.schedules)
+  @ManyToOne(() => Film, (film) => film.schedule)
   @JoinColumn({ name: 'filmId' })
   film: Film; 
 }

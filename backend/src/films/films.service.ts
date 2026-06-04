@@ -9,20 +9,13 @@ import { Film } from './entities/film.entity';
 export class FilmsService {
   constructor(private readonly filmsRepository: FilmsRepository) {}
 
-  private toFilmDto(doc: Film): FilmDto {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { schedules: _, ...film } = doc;
-    return film;
-  }
 
   async findAll(): Promise<{ total: number; items: FilmDto[] }> {
     const films = await this.filmsRepository.findAll();
 
-    const items: FilmDto[] = films.map(this.toFilmDto);
-
     return {
-      total: items.length,
-      items: items,
+      total: films.length,
+      items: films,
     };
   }
 
@@ -36,14 +29,8 @@ export class FilmsService {
     }
 
     return {
-      total: film.schedules.length,
-      items: film.schedules.map((s) => ({
-        ...s,
-        daytime:
-          s.daytime instanceof Date
-            ? s.daytime.toISOString()
-            : String(s.daytime),
-      })),
+      total: film.schedule.length,
+      items: film.schedule
     };
   }
 }

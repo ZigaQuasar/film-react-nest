@@ -31,6 +31,9 @@ import { OrderModule } from './order/order.module';
     ServeStaticModule.forRoot({
       rootPath: path.join(process.cwd(), 'public', 'content', 'afisha'),
       serveRoot: '/content/afisha',
+      serveStaticOptions: {
+        index: false,
+      },
     }),
     FilmsModule,
     OrderModule,

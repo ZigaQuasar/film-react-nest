@@ -31,5 +31,5 @@ export class Film {
   description: string;
 
   @OneToMany(() => Schedule, (schedule) => schedule.film)
-  schedules: Schedule[];
+  schedule: Schedule[];
 }
