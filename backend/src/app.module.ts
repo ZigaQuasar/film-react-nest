@@ -22,7 +22,7 @@ import { OrderModule } from './order/order.module';
         port: configService.get<number>('DATABASE_PORT') || 5432,
         username: configService.get<string>('DATABASE_USERNAME'),
         password: configService.get<string>('DATABASE_PASSWORD'),
-        database: configService.get<string>('DATABASE_NAME') || 'prac',
+        database: configService.get<string>('DATABASE_NAME') || 'films',
         entities: [Film, Schedule],
         synchronize: false,
       }),
