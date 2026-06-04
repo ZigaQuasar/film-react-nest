@@ -28,7 +28,7 @@ export class FilmsRepository implements IFilmsRepository {
   ){}
 
   async findAll(): Promise<Film[]> {
-    return this.filmRepository.find({ relations: ['schedule'] });
+    return this.filmRepository.find();
   }
 
   async findById(id: string): Promise<Film | undefined> {
@@ -52,16 +52,18 @@ export class FilmsRepository implements IFilmsRepository {
     sessionId: string,
     seats: string[]
   ): Promise<boolean> {
+    const seatsStr = seats.join(',');
     const result = await this.scheduleRepository
       .createQueryBuilder()
       .update(Schedule)
       .set({
-        taken: () => `array_cat(taken, :seats::text[])`,
+        taken: () => `CASE WHEN taken = '' THEN :newSeats ELSE taken || ',' || :newSeats END`,
       })
       .where('id = :sessionId', { sessionId })
       .andWhere('"filmId" = :filmId', { filmId })
-      .andWhere(`NOT (taken && :seats::text[])`, { seats })
-      .setParameter('seats', `{${seats.join(',')}}`)
+      .andWhere(`(taken = '' OR NOT (string_to_array(taken, ',') && :checkSeats::text[]))`)
+      .setParameter('newSeats', seatsStr)
+      .setParameter('checkSeats', `{${seatsStr}}`)
       .execute();
 
     return result.affected === 1;
