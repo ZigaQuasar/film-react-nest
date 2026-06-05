@@ -6,19 +6,19 @@ export class Schedule {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column('varchar')
   daytime: string;
 
-  @Column()
+  @Column('integer')
   hall: number;
 
-  @Column()
+  @Column('integer')
   rows: number;
 
-  @Column()
+  @Column('integer')
   seats: number;
 
-  @Column()
+  @Column('double precision')
   price: number;
 
   @Column('simple-array')

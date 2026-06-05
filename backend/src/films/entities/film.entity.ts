@@ -6,28 +6,28 @@ export class Film {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column('double precision')
   rating: number;
 
-  @Column()
+  @Column('varchar')
   director: string;
 
   @Column('simple-array')
   tags: string[];
 
-  @Column()
+  @Column('varchar')
   image: string;
 
-  @Column()
+  @Column('varchar')
   cover: string;
 
-  @Column()
+  @Column('varchar')
   title: string;
 
-  @Column()
+  @Column('varchar')
   about: string;
 
-  @Column()
+  @Column('varchar')
   description: string;
 
   @OneToMany(() => Schedule, (schedule) => schedule.film, { eager: true })
