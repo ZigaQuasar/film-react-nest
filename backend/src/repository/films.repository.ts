@@ -33,8 +33,7 @@ export class FilmsRepository implements IFilmsRepository {
 
   async findById(id: string): Promise<Film | undefined> {
     return this.filmRepository.findOne({
-      where: { id },
-      relations: ['schedule'],
+      where: { id }
     });
   }
 

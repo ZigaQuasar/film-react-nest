@@ -23,8 +23,8 @@ import { OrderModule } from './order/order.module';
         username: configService.get<string>('DATABASE_USERNAME'),
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get<string>('DATABASE_NAME') || 'films',
-        entities: [Film, Schedule],
-        synchronize: false,
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        synchronize: configService.get<string>('NODE_ENV') !== 'production'
       }),
       inject: [ConfigService],
     }),
