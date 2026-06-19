@@ -1,19 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Film } from '../films/schemas/film.schema';
-
-export interface FilmWithSchedule extends Film {
-  schedule: NonNullable<Film['schedule']>;
-}
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Film } from '../films/entities/film.entity';
+import { Schedule } from '../films/entities/schedule.entity';
 
 interface IFilmsRepository {
-  findAll(): Promise<FilmWithSchedule[]>;
-  findById(id: string): Promise<FilmWithSchedule | undefined>;
+  findAll(): Promise<Film[]>;
+  findById(id: string): Promise<Film | undefined>;
   findSessionById(
     filmId: string,
     sessionId: string,
-  ): Promise<NonNullable<FilmWithSchedule['schedule']>[0] | undefined>;
+  ): Promise<Schedule | undefined>;
   bookSeatsAtomic(
     filmId: string,
     sessionId: string,
@@ -23,40 +20,51 @@ interface IFilmsRepository {
 
 @Injectable()
 export class FilmsRepository implements IFilmsRepository {
-  constructor(@InjectModel(Film.name) private filmModel: Model<Film>) {}
+  constructor(
+    @InjectRepository(Film)
+    private readonly filmRepository: Repository<Film>,
+    @InjectRepository(Schedule)
+    private readonly scheduleRepository: Repository<Schedule>,
+  ){}
 
-  async findAll(): Promise<FilmWithSchedule[]> {
-    return this.filmModel.find().lean();
+  async findAll(): Promise<Film[]> {
+    return this.filmRepository.find();
   }
 
-  async findById(id: string): Promise<FilmWithSchedule | undefined> {
-    return this.filmModel.findOne({ id }).lean();
+  async findById(id: string): Promise<Film | undefined> {
+    return this.filmRepository.findOne({
+      where: { id }
+    });
   }
 
   async findSessionById(filmId: string, sessionId: string) {
-    const film = await this.filmModel
-      .findOne({ id: filmId, 'schedule.id': sessionId })
-      .select('schedule')
-      .lean();
-
-    if (!film) return undefined;
-    return film.schedule?.find((s) => s.id === sessionId);
+    return this.scheduleRepository.findOne({
+    where: {
+      id: sessionId,
+      film: { id: filmId }
+      }
+    });
   }
 
   async bookSeatsAtomic(
     filmId: string,
     sessionId: string,
-    seats: string[],
+    seats: string[]
   ): Promise<boolean> {
-    const result = await this.filmModel.updateOne(
-      {
-        id: filmId,
-        'schedule.id': sessionId,
-        'schedule.taken': { $not: { $elemMatch: { $in: seats } } },
-      },
-      { $addToSet: { 'schedule.$.taken': { $each: seats } } },
-    );
+    const seatsStr = seats.join(',');
+    const result = await this.scheduleRepository
+      .createQueryBuilder()
+      .update(Schedule)
+      .set({
+        taken: () => `CASE WHEN taken = '' THEN :newSeats ELSE taken || ',' || :newSeats END`,
+      })
+      .where('id = :sessionId', { sessionId })
+      .andWhere('"filmId" = :filmId', { filmId })
+      .andWhere(`(taken = '' OR NOT (string_to_array(taken, ',') && :checkSeats::text[]))`)
+      .setParameter('newSeats', seatsStr)
+      .setParameter('checkSeats', `{${seatsStr}}`)
+      .execute();
 
-    return result.modifiedCount === 1;
+    return result.affected === 1;
   }
 }

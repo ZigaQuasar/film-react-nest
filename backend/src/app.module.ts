@@ -3,7 +3,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import * as path from 'node:path';
 
-import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Film } from './films/entities/film.entity';
+import { Schedule } from './films/entities/schedule.entity';
 import { FilmsModule } from './films/films.module';
 import { OrderModule } from './order/order.module';
 
@@ -13,15 +15,25 @@ import { OrderModule } from './order/order.module';
       isGlobal: true,
       cache: true,
     }),
-    MongooseModule.forRootAsync({
+    TypeOrmModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
-        uri: configService.get<string>('DATABASE_URL'),
+        type: configService.get<'postgres' | 'mysql' | 'sqlite'>('DATABASE_DRIVER'),
+        host: configService.get<string>('DATABASE_HOST') || 'localhost',
+        port: configService.get<number>('DATABASE_PORT') || 5432,
+        username: configService.get<string>('DATABASE_USERNAME'),
+        password: configService.get<string>('DATABASE_PASSWORD'),
+        database: configService.get<string>('DATABASE_NAME') || 'films',
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        synchronize: configService.get<string>('NODE_ENV') !== 'production'
       }),
       inject: [ConfigService],
     }),
     ServeStaticModule.forRoot({
       rootPath: path.join(process.cwd(), 'public', 'content', 'afisha'),
       serveRoot: '/content/afisha',
+      serveStaticOptions: {
+        index: false,
+      },
     }),
     FilmsModule,
     OrderModule,
