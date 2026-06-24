@@ -1,0 +1,88 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: ghcr.io/zigaquasar/film-react-nest/frontend:latest
+    volumes:
+      - frontend-dist:/app/dist
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: ghcr.io/zigaquasar/film-react-nest/backend:latest
+    environment:
+      - DATABASE_DRIVER=postgres
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USERNAME=prac
+      - DATABASE_PASSWORD=qwerty123
+      - DATABASE_NAME=prac
+      - NODE_ENV=production
+      - LOGGER_TYPE=tskv
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=prac
+      - POSTGRES_PASSWORD=qwerty123
+      - POSTGRES_DB=prac
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U prac"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    image: ghcr.io/zigaquasar/film-react-nest/nginx:latest
+    volumes:
+      - frontend-dist:/usr/share/nginx/html:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - app-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+volumes:
+  frontend-dist:
+  postgres-data:
+  pgadmin-data:
+
+networks:
+  app-network:
+    driver: bridge
