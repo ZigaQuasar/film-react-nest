@@ -4,6 +4,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     image: ghcr.io/zigaquasar/film-react-nest/frontend:latest
+    restart: unless-stopped
     volumes:
       - frontend-dist:/app/dist
     networks:
@@ -14,15 +15,9 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     image: ghcr.io/zigaquasar/film-react-nest/backend:latest
-    environment:
-      - DATABASE_DRIVER=postgres
-      - DATABASE_HOST=postgres
-      - DATABASE_PORT=5432
-      - DATABASE_USERNAME=prac
-      - DATABASE_PASSWORD=qwerty123
-      - DATABASE_NAME=prac
-      - NODE_ENV=production
-      - LOGGER_TYPE=tskv
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
     ports:
       - "3000:3000"
     depends_on:
@@ -33,10 +28,9 @@ services:
 
   postgres:
     image: postgres:15-alpine
-    environment:
-      - POSTGRES_USER=prac
-      - POSTGRES_PASSWORD=qwerty123
-      - POSTGRES_DB=prac
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
     volumes:
       - postgres-data:/var/lib/postgresql/data
     ports:
@@ -54,6 +48,7 @@ services:
       context: ./nginx
       dockerfile: Dockerfile
     image: ghcr.io/zigaquasar/film-react-nest/nginx:latest
+    restart: unless-stopped
     volumes:
       - frontend-dist:/usr/share/nginx/html:ro
     ports:
@@ -66,9 +61,9 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
-      - PGADMIN_DEFAULT_PASSWORD=admin
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
     ports:
       - "8080:80"
     volumes:
