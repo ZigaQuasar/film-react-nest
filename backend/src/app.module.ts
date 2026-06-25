@@ -4,8 +4,6 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import * as path from 'node:path';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Film } from './films/entities/film.entity';
-import { Schedule } from './films/entities/schedule.entity';
 import { FilmsModule } from './films/films.module';
 import { OrderModule } from './order/order.module';
 
